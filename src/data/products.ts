@@ -16,7 +16,7 @@ const products: Array<Product> = [
   {
     id: 1,
     name: 'Bablade Grønt Eple',
-    flavor: 'Green Apple',
+    flavor: 'Grønt eple',
     tagline: 'Sprø som en morgen i skogen',
     description:
       'Frisk og livlig eplebrus som minner om å gå gjennom en norsk eplehage på en solfylt sommerdag. Naturlig eplearoma gir en sprudlende og forfriskende smaksopplevelse som pirrer smaksløkene med sin sprø, grønne sødme. Brygget med vann fra norske fjellkilder.',
@@ -30,7 +30,7 @@ const products: Array<Product> = [
   {
     id: 2,
     name: 'Bablade Vannmelon',
-    flavor: 'Watermelon',
+    flavor: 'Vannmelon',
     tagline: 'Sommer i hvert eneste slurk',
     description:
       'Den ultimate sommerbrus! Saftig og søt vannmelonsmak som tar deg rett til en varm sommerdag ved fjorden. Perfekt avkjøling etter en lang tur i fjellheimen, med et frisk preg av norsk sommerluft i hvert eneste boble.',
@@ -44,7 +44,7 @@ const products: Array<Product> = [
   {
     id: 3,
     name: 'Bablade Fruktpunch',
-    flavor: 'Fruit Punch',
+    flavor: 'Fruktpunch',
     tagline: 'En fest for smaksløkene',
     description:
       'En eksplosiv blanding av tropiske fruktsmaker møter norsk sommerglede. Appelsin, ananas og mango danser sammen i et fargerikt kor. Livlig, søt og full av energi – perfekt for alle som vil ha litt ekstra fart i hverdagen.',
@@ -58,7 +58,7 @@ const products: Array<Product> = [
   {
     id: 4,
     name: 'Bablade Jordbær',
-    flavor: 'Strawberry',
+    flavor: 'Jordbær',
     tagline: 'Søt som norske jordbær',
     description:
       'Inspirert av de berømte søte norske jordbærene fra Vestfold og Telemark. Denne brusen fanger den naturlige aromaen av nyplukkede jordbær i en sprudlende og sjarmerende drikk. En smak som vekker minner om lange norske sommerkvelder.',
@@ -72,7 +72,7 @@ const products: Array<Product> = [
   {
     id: 5,
     name: 'Bablade Bringebær',
-    flavor: 'Raspberry',
+    flavor: 'Bringebær',
     tagline: 'Ville bær fra norsk skog',
     description:
       'Dyp og intens bringebærsmak hentet fra de norske skogers skatter. Perfekt balanse mellom syrlig og søtt, akkurat som å plukke ville bringebær langs en sommersti i Norges vakre natur. En smak av frihet og eventyr.',
@@ -86,7 +86,7 @@ const products: Array<Product> = [
   {
     id: 6,
     name: 'Bablade Miksen',
-    flavor: 'Mix',
+    flavor: 'Miks',
     tagline: 'Alle smaker i én flaske',
     description:
       'Hvorfor velge én smak når du kan ha alle fem? Bablade Miksen kombinerer grønt eple, vannmelon, fruktpunch, jordbær og bringebær i en enestående smakseksplosjon. Den ultimate norske sommerbrus for de som elsker det uventede og ikke klarer å bestemme seg!',

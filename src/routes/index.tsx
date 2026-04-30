@@ -1,11 +1,13 @@
+import { useState } from 'react'
 import { Link, createFileRoute } from '@tanstack/react-router'
+import OrderPanel from '@/components/OrderPanel'
 import products, { type Product } from '@/data/products'
 
 export const Route = createFileRoute('/')({
   component: HomePage,
 })
 
-function NorwegianBackground({ id = 'bg', tint = '#4fc3f7' }: { id?: string; tint?: string }) {
+function NorwegianBackground({ id = 'bg' }: { id?: string }) {
   return (
     <svg
       className="absolute inset-0 w-full h-full"
@@ -145,7 +147,7 @@ function NorwegianBackground({ id = 'bg', tint = '#4fc3f7' }: { id?: string; tin
 }
 
 function BottleSvg({ product, size = 320 }: { product: Product; size?: number }) {
-  const isMix = product.flavor === 'Mix'
+  const isMix = product.id === 6
   const gradId = `bottle-label-${product.id}`
   const mixColors = ['#2e7d32', '#b71c1c', '#e65100', '#ad1457', '#6a1b9a', '#1565c0']
 
@@ -318,11 +320,9 @@ function BottleSvg({ product, size = 320 }: { product: Product; size?: number })
   )
 }
 
-function FlavorCard({ product, index }: { product: Product; index: number }) {
+function FlavorCard({ product, onBuy }: { product: Product; onBuy: (product: Product) => void }) {
   return (
-    <Link
-      to="/products/$productId"
-      params={{ productId: product.id.toString() }}
+    <article
       className="group relative overflow-hidden rounded-3xl transition-all duration-500 hover:-translate-y-2 hover:shadow-2xl block"
       style={{
         background: `linear-gradient(145deg, ${product.color}18, ${product.colorAlt}30)`,
@@ -336,43 +336,71 @@ function FlavorCard({ product, index }: { product: Product; index: number }) {
       />
 
       <div className="relative p-6 flex flex-col items-center gap-4">
-        <div className="transition-transform duration-500 group-hover:scale-105 group-hover:-rotate-3">
-          <BottleSvg product={product} size={110} />
-        </div>
-        <div className="text-center">
-          <p
-            className="text-xs font-bold tracking-widest uppercase mb-1 opacity-70"
-            style={{ color: product.color, fontFamily: 'Nunito, sans-serif' }}
-          >
-            {product.flavor}
-          </p>
-          <h3
-            className="text-lg font-black leading-tight"
-            style={{ color: product.color, fontFamily: 'Righteous, sans-serif' }}
-          >
-            {product.name}
-          </h3>
-          <p className="text-sm mt-2 opacity-70 leading-snug" style={{ fontFamily: 'Nunito, sans-serif' }}>
-            {product.shortDescription}
-          </p>
-          <div
-            className="mt-4 inline-block px-5 py-2 rounded-full text-white text-sm font-bold transition-all duration-300 group-hover:shadow-lg"
-            style={{
-              background: `linear-gradient(135deg, ${product.color}, ${product.colorAlt})`,
-              fontFamily: 'Nunito, sans-serif',
-            }}
-          >
-            kr {product.price},–
+        <Link
+          to="/products/$productId"
+          params={{ productId: product.id.toString() }}
+          className="flex flex-col items-center gap-4 text-center"
+        >
+          <div className="transition-transform duration-500 group-hover:scale-105 group-hover:-rotate-3">
+            <BottleSvg product={product} size={110} />
           </div>
-        </div>
+          <div>
+            <p
+              className="text-xs font-bold tracking-widest uppercase mb-1 opacity-70"
+              style={{ color: product.color, fontFamily: 'Nunito, sans-serif' }}
+            >
+              {product.flavor}
+            </p>
+            <h3
+              className="text-lg font-black leading-tight"
+              style={{ color: product.color, fontFamily: 'Righteous, sans-serif' }}
+            >
+              {product.name}
+            </h3>
+            <p className="text-sm mt-2 opacity-70 leading-snug" style={{ fontFamily: 'Nunito, sans-serif' }}>
+              {product.shortDescription}
+            </p>
+            <div
+              className="mt-4 inline-block px-5 py-2 rounded-full text-white text-sm font-bold transition-all duration-300 group-hover:shadow-lg"
+              style={{
+                background: `linear-gradient(135deg, ${product.color}, ${product.colorAlt})`,
+                fontFamily: 'Nunito, sans-serif',
+              }}
+            >
+              kr {product.price},–
+            </div>
+          </div>
+        </Link>
+
+        <button
+          type="button"
+          className="w-full rounded-2xl px-5 py-3 text-sm font-black text-white transition-all duration-300 hover:scale-[1.02] hover:shadow-xl active:scale-[0.98]"
+          style={{
+            background: `linear-gradient(135deg, ${product.color}, ${product.colorAlt})`,
+            boxShadow: `0 8px 22px ${product.color}35`,
+            fontFamily: 'Righteous, sans-serif',
+            letterSpacing: '0.8px',
+          }}
+          onClick={() => onBuy(product)}
+        >
+          Kjøp nå
+        </button>
       </div>
-    </Link>
+    </article>
   )
 }
 
 function HomePage() {
+  const [selectedProduct, setSelectedProduct] = useState<Product | null>(null)
+
   return (
     <div style={{ fontFamily: 'Nunito, sans-serif', background: '#f8fffe' }}>
+      <OrderPanel
+        isOpen={selectedProduct !== null}
+        product={selectedProduct}
+        onClose={() => setSelectedProduct(null)}
+      />
+
       {/* Hero Section */}
       <section className="relative min-h-screen flex flex-col items-center justify-center overflow-hidden">
         <NorwegianBackground id="hero" />
@@ -490,9 +518,9 @@ function HomePage() {
           </p>
         </div>
 
-        <div className="grid grid-cols-2 md:grid-cols-3 gap-5">
-          {products.map((product, index) => (
-            <FlavorCard key={product.id} product={product} index={index} />
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-5">
+          {products.map((product) => (
+            <FlavorCard key={product.id} product={product} onBuy={setSelectedProduct} />
           ))}
         </div>
       </section>

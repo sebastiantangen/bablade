@@ -6,14 +6,14 @@ A marketing website for **Bablade**, a Norwegian summer soda brand available in 
 
 Bablade is a 0.5L plastic bottle soda with a color-coded label and matching cap for each flavor:
 
-| Flavor | Color |
-|--------|-------|
-| Green Apple | Forest green |
-| Watermelon | Deep red |
-| Fruit Punch | Burnt orange |
-| Strawberry | Hot pink |
-| Raspberry | Deep purple |
-| Mix (all flavors) | Blue gradient |
+| Smak | Farge |
+|------|-------|
+| Grønt eple | Forest green |
+| Vannmelon | Deep red |
+| Fruktpunch | Burnt orange |
+| Jordbær | Hot pink |
+| Bringebær | Deep purple |
+| Miks (alle smaker) | Blue gradient |
 
 Each flavor page features a Norwegian fjord/nature background scene.
 
@@ -51,6 +51,22 @@ npm run build
 ```
 
 Output is placed in `dist/client/`.
+
+## Order Email
+
+The purchase flow posts to `/api/orders` and sends the owner an email through Resend. Copy `.env.example` to `.env`, fill in the values, and restart the dev server:
+
+```bash
+cp .env.example .env
+```
+
+```bash
+RESEND_API_KEY=...
+ORDER_EMAIL_TO=owner@example.com
+ORDER_EMAIL_FROM="Bablade <orders@your-verified-domain.no>"
+```
+
+Set the same variables in Netlify for production. `ORDER_EMAIL_FROM` should use a verified sender/domain in Resend.
 
 ## Routes
 

@@ -1,4 +1,6 @@
+import { useState } from 'react'
 import { Link, createFileRoute } from '@tanstack/react-router'
+import OrderPanel from '@/components/OrderPanel'
 import products, { type Product } from '../../data/products'
 
 export const Route = createFileRoute('/products/$productId')({
@@ -143,7 +145,7 @@ function NorwegianBg({ product }: { product: Product }) {
 }
 
 function LargeBottleSvg({ product }: { product: Product }) {
-  const isMix = product.flavor === 'Mix'
+  const isMix = product.id === 6
   const gradId = `detail-label-${product.id}`
   const mixColors = ['#2e7d32', '#b71c1c', '#e65100', '#ad1457', '#6a1b9a', '#1565c0']
 
@@ -315,12 +317,19 @@ function LargeBottleSvg({ product }: { product: Product }) {
 
 function RouteComponent() {
   const product = Route.useLoaderData()
+  const [isOrderOpen, setIsOrderOpen] = useState(false)
 
   return (
     <div
       className="min-h-screen"
       style={{ fontFamily: 'Nunito, sans-serif', background: '#f0faf0' }}
     >
+      <OrderPanel
+        isOpen={isOrderOpen}
+        product={product}
+        onClose={() => setIsOrderOpen(false)}
+      />
+
       {/* Background */}
       <div className="fixed inset-0 z-0">
         <NorwegianBg product={product} />
@@ -432,6 +441,7 @@ function RouteComponent() {
                   </div>
                 </div>
                 <button
+                  type="button"
                   className="flex-1 py-4 rounded-2xl text-white font-black text-lg transition-all duration-300 hover:scale-105 hover:shadow-xl active:scale-95"
                   style={{
                     background: `linear-gradient(135deg, ${product.color}, ${product.colorAlt})`,
@@ -439,6 +449,7 @@ function RouteComponent() {
                     fontFamily: 'Righteous, sans-serif',
                     letterSpacing: '1px',
                   }}
+                  onClick={() => setIsOrderOpen(true)}
                 >
                   Kjøp nå
                 </button>
