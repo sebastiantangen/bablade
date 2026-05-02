@@ -15,17 +15,6 @@ The product pages and homepage use inline SVG bottle illustrations and a Norwegi
 - Attempts to send the customer an order confirmation email
 - States that Bablade will contact the customer and send a Vipps payment request
 
-## Flavors
-
-| Smak | Pris | Fargeprofil |
-| --- | ---: | --- |
-| Grønt eple | kr 35 | Green |
-| Vannmelon | kr 35 | Red |
-| Fruktpunch | kr 35 | Orange |
-| Jordbær | kr 35 | Pink |
-| Bringebær | kr 35 | Purple |
-| Miks | kr 39 | Blue / mixed gradient |
-
 ## Tech Stack
 
 | Layer | Technology |
