@@ -231,7 +231,6 @@ async function sendOrderEmail({ customer, items, orderedAt }: OrderEmailInput) {
     subject: `Ny Bablade-bestilling - ${customer.phoneNumber}`,
     text: ownerText,
     html: ownerHtml,
-    replyTo: customer.email,
   })
 
   try {
@@ -252,7 +251,6 @@ async function sendResendEmail({
   apiKey,
   from,
   html,
-  replyTo,
   subject,
   text,
   to,
@@ -260,7 +258,6 @@ async function sendResendEmail({
   apiKey: string
   from: string
   html: string
-  replyTo?: string
   subject: string
   text: string
   to: string[]
@@ -277,7 +274,6 @@ async function sendResendEmail({
       text,
       html,
       subject,
-      reply_to: replyTo,
     }),
   })
 
