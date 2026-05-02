@@ -20,7 +20,7 @@ export const Route = createFileRoute('/api/orders')({
           return Response.json({ message: 'Ugyldig bestilling.' }, { status: 400 })
         }
 
-        const phoneNumber = normalizeNorwegianPhone(parsedOrder.data.phoneNumber)
+        const phoneNumber = normalizeNorwegianPhone(parsedOrder.data.customer.phoneNumber)
 
         if (!phoneNumber) {
           return Response.json({ message: 'Ugyldig telefonnummer.' }, { status: 400 })
@@ -40,8 +40,11 @@ export const Route = createFileRoute('/api/orders')({
 
         try {
           await sendOrderEmail({
+            customer: {
+              ...parsedOrder.data.customer,
+              phoneNumber,
+            },
             items: confirmedItems,
-            phoneNumber,
             orderedAt,
           })
         } catch (error) {
@@ -60,7 +63,11 @@ export const Route = createFileRoute('/api/orders')({
 })
 
 const orderSchema = z.object({
-  phoneNumber: z.string().min(1),
+  customer: z.object({
+    name: z.string().trim().min(2).max(120),
+    email: z.string().trim().email().max(254),
+    phoneNumber: z.string().min(1),
+  }),
   items: z
     .array(
       z.object({
@@ -73,11 +80,15 @@ const orderSchema = z.object({
 })
 
 type OrderEmailInput = {
+  customer: {
+    name: string
+    email: string
+    phoneNumber: string
+  }
   items: Array<{
     product: (typeof products)[number]
     quantity: number
   }>
-  phoneNumber: string
   orderedAt: Date
 }
 
@@ -101,7 +112,7 @@ function normalizeNorwegianPhone(value: string) {
   return `+47 ${localNumber.slice(0, 3)} ${localNumber.slice(3, 5)} ${localNumber.slice(5)}`
 }
 
-async function sendOrderEmail({ items, phoneNumber, orderedAt }: OrderEmailInput) {
+async function sendOrderEmail({ customer, items, orderedAt }: OrderEmailInput) {
   const apiKey = process.env.RESEND_API_KEY
   const to = process.env.ORDER_EMAIL_TO
   const from = process.env.ORDER_EMAIL_FROM ?? 'Bablade <orders@resend.dev>'
@@ -122,49 +133,134 @@ async function sendOrderEmail({ items, phoneNumber, orderedAt }: OrderEmailInput
       `${product.name} (${product.flavor}) x ${quantity} - kr ${product.price * quantity},-`,
   )
 
-  const text = [
+  const ownerText = [
     'Ny bestilling fra Bablade',
+    '',
+    'Kunde:',
+    `Navn: ${customer.name}`,
+    `E-post: ${customer.email}`,
+    `Telefonnummer: ${customer.phoneNumber}`,
     '',
     'Produkter:',
     ...itemLines,
     '',
     `Antall totalt: ${items.reduce((sum, item) => sum + item.quantity, 0)}`,
     `Totalsum: kr ${total},-`,
-    `Telefonnummer: ${phoneNumber}`,
     `Tidspunkt: ${orderTime}`,
   ].join('\n')
 
-  const html = `
+  const orderTableRows = items
+    .map(
+      ({ product, quantity }) => `
+        <tr>
+          <td>${escapeHtml(product.name)}</td>
+          <td>${escapeHtml(product.flavor)}</td>
+          <td align="right">${quantity}</td>
+          <td align="right">kr ${product.price},-</td>
+          <td align="right">kr ${product.price * quantity},-</td>
+        </tr>
+      `,
+    )
+    .join('')
+
+  const ownerHtml = `
     <h1>Ny bestilling fra Bablade</h1>
+    <h2>Kunde</h2>
+    <p>
+      <strong>Navn:</strong> ${escapeHtml(customer.name)}<br>
+      <strong>E-post:</strong> ${escapeHtml(customer.email)}<br>
+      <strong>Telefonnummer:</strong> ${escapeHtml(customer.phoneNumber)}
+    </p>
     <table cellpadding="8" cellspacing="0" style="border-collapse: collapse;">
       <thead>
         <tr>
           <th align="left">Produkt</th>
           <th align="left">Smak</th>
           <th align="right">Antall</th>
+          <th align="right">Pris</th>
           <th align="right">Sum</th>
         </tr>
       </thead>
       <tbody>
-        ${items
-          .map(
-            ({ product, quantity }) => `
-              <tr>
-                <td>${escapeHtml(product.name)}</td>
-                <td>${escapeHtml(product.flavor)}</td>
-                <td align="right">${quantity}</td>
-                <td align="right">kr ${product.price * quantity},-</td>
-              </tr>
-            `,
-          )
-          .join('')}
+        ${orderTableRows}
       </tbody>
     </table>
     <p><strong>Totalsum:</strong> kr ${total},-</p>
-    <p><strong>Telefonnummer:</strong> ${escapeHtml(phoneNumber)}</p>
     <p><strong>Tidspunkt:</strong> ${escapeHtml(orderTime)}</p>
   `
 
+  const customerText = [
+    'Takk for bestillingen hos Bablade!',
+    '',
+    'Vi har mottatt bestillingen din og kontakter deg for betaling med Vipps før ordren bekreftes.',
+    '',
+    'Din bestilling:',
+    ...itemLines,
+    '',
+    `Totalsum: kr ${total},-`,
+    `Telefonnummer: ${customer.phoneNumber}`,
+    `Tidspunkt: ${orderTime}`,
+  ].join('\n')
+
+  const customerHtml = `
+    <h1>Takk for bestillingen hos Bablade!</h1>
+    <p>Vi har mottatt bestillingen din og kontakter deg for betaling med Vipps før ordren bekreftes.</p>
+    <table cellpadding="8" cellspacing="0" style="border-collapse: collapse;">
+      <thead>
+        <tr>
+          <th align="left">Produkt</th>
+          <th align="left">Smak</th>
+          <th align="right">Antall</th>
+          <th align="right">Pris</th>
+          <th align="right">Sum</th>
+        </tr>
+      </thead>
+      <tbody>
+        ${orderTableRows}
+      </tbody>
+    </table>
+    <p><strong>Totalsum:</strong> kr ${total},-</p>
+    <p><strong>Telefonnummer:</strong> ${escapeHtml(customer.phoneNumber)}</p>
+    <p><strong>Tidspunkt:</strong> ${escapeHtml(orderTime)}</p>
+  `
+
+  await sendResendEmail({
+    apiKey,
+    from,
+    to: to.split(',').map((email) => email.trim()).filter(Boolean),
+    subject: `Ny Bablade-bestilling - ${customer.phoneNumber}`,
+    text: ownerText,
+    html: ownerHtml,
+    replyTo: customer.email,
+  })
+
+  await sendResendEmail({
+    apiKey,
+    from,
+    to: [customer.email],
+    subject: 'Vi har mottatt Bablade-bestillingen din',
+    text: customerText,
+    html: customerHtml,
+  })
+}
+
+async function sendResendEmail({
+  apiKey,
+  from,
+  html,
+  replyTo,
+  subject,
+  text,
+  to,
+}: {
+  apiKey: string
+  from: string
+  html: string
+  replyTo?: string
+  subject: string
+  text: string
+  to: string[]
+}) {
   const response = await fetch('https://api.resend.com/emails', {
     method: 'POST',
     headers: {
@@ -173,10 +269,11 @@ async function sendOrderEmail({ items, phoneNumber, orderedAt }: OrderEmailInput
     },
     body: JSON.stringify({
       from,
-      to: to.split(',').map((email) => email.trim()).filter(Boolean),
-      subject: `Ny Bablade-bestilling - ${phoneNumber}`,
+      to,
       text,
       html,
+      subject,
+      reply_to: replyTo,
     }),
   })
 

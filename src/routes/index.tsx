@@ -1,6 +1,5 @@
-import { useState } from 'react'
 import { Link, createFileRoute } from '@tanstack/react-router'
-import OrderPanel from '@/components/OrderPanel'
+import { useCart } from '@/cart/CartContext'
 import products, { type Product } from '@/data/products'
 
 export const Route = createFileRoute('/')({
@@ -320,7 +319,9 @@ function BottleSvg({ product, size = 320 }: { product: Product; size?: number })
   )
 }
 
-function FlavorCard({ product, onBuy }: { product: Product; onBuy: (product: Product) => void }) {
+function FlavorCard({ product }: { product: Product }) {
+  const { addItem, openCart } = useCart()
+
   return (
     <article
       className="group relative overflow-hidden rounded-3xl transition-all duration-500 hover:-translate-y-2 hover:shadow-2xl block"
@@ -381,9 +382,12 @@ function FlavorCard({ product, onBuy }: { product: Product; onBuy: (product: Pro
             fontFamily: 'Righteous, sans-serif',
             letterSpacing: '0.8px',
           }}
-          onClick={() => onBuy(product)}
+          onClick={() => {
+            addItem(product.id)
+            openCart()
+          }}
         >
-          Kjøp nå
+          Legg i handlekurv
         </button>
       </div>
     </article>
@@ -391,16 +395,8 @@ function FlavorCard({ product, onBuy }: { product: Product; onBuy: (product: Pro
 }
 
 function HomePage() {
-  const [selectedProduct, setSelectedProduct] = useState<Product | null>(null)
-
   return (
     <div style={{ fontFamily: 'Nunito, sans-serif', background: '#f8fffe' }}>
-      <OrderPanel
-        isOpen={selectedProduct !== null}
-        product={selectedProduct}
-        onClose={() => setSelectedProduct(null)}
-      />
-
       {/* Hero Section */}
       <section className="relative min-h-screen flex flex-col items-center justify-center overflow-hidden">
         <NorwegianBackground id="hero" />
@@ -520,7 +516,7 @@ function HomePage() {
 
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-5">
           {products.map((product) => (
-            <FlavorCard key={product.id} product={product} onBuy={setSelectedProduct} />
+            <FlavorCard key={product.id} product={product} />
           ))}
         </div>
       </section>

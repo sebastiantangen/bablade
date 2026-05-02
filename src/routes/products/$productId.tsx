@@ -1,6 +1,6 @@
-import { useState } from 'react'
 import { Link, createFileRoute } from '@tanstack/react-router'
-import OrderPanel from '@/components/OrderPanel'
+import { ShoppingCart } from 'lucide-react'
+import { useCart } from '@/cart/CartContext'
 import products, { type Product } from '../../data/products'
 
 export const Route = createFileRoute('/products/$productId')({
@@ -317,19 +317,13 @@ function LargeBottleSvg({ product }: { product: Product }) {
 
 function RouteComponent() {
   const product = Route.useLoaderData()
-  const [isOrderOpen, setIsOrderOpen] = useState(false)
+  const { addItem, openCart } = useCart()
 
   return (
     <div
       className="min-h-screen"
       style={{ fontFamily: 'Nunito, sans-serif', background: '#f0faf0' }}
     >
-      <OrderPanel
-        isOpen={isOrderOpen}
-        product={product}
-        onClose={() => setIsOrderOpen(false)}
-      />
-
       {/* Background */}
       <div className="fixed inset-0 z-0">
         <NorwegianBg product={product} />
@@ -442,16 +436,20 @@ function RouteComponent() {
                 </div>
                 <button
                   type="button"
-                  className="flex-1 py-4 rounded-2xl text-white font-black text-lg transition-all duration-300 hover:scale-105 hover:shadow-xl active:scale-95"
+                  className="flex flex-1 items-center justify-center gap-2 rounded-2xl py-4 text-lg font-black text-white transition-all duration-300 hover:scale-105 hover:shadow-xl active:scale-95"
                   style={{
                     background: `linear-gradient(135deg, ${product.color}, ${product.colorAlt})`,
                     boxShadow: `0 8px 25px ${product.color}45`,
                     fontFamily: 'Righteous, sans-serif',
                     letterSpacing: '1px',
                   }}
-                  onClick={() => setIsOrderOpen(true)}
+                  onClick={() => {
+                    addItem(product.id)
+                    openCart()
+                  }}
                 >
-                  Kjøp nå
+                  <ShoppingCart size={20} aria-hidden="true" />
+                  Legg i handlekurv
                 </button>
               </div>
             </div>

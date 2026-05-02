@@ -1,4 +1,6 @@
-import { HeadContent, Scripts, createRootRoute } from '@tanstack/react-router'
+import { HeadContent, Outlet, Scripts, createRootRoute } from '@tanstack/react-router'
+import CartDrawer from '@/cart/CartDrawer'
+import { CartProvider } from '@/cart/CartContext'
 import '../styles.css'
 
 export const Route = createRootRoute({
@@ -18,8 +20,18 @@ export const Route = createRootRoute({
       },
     ],
   }),
+  component: RootComponent,
   shellComponent: RootDocument,
 })
+
+function RootComponent() {
+  return (
+    <CartProvider>
+      <Outlet />
+      <CartDrawer />
+    </CartProvider>
+  )
+}
 
 function RootDocument({ children }: { children: React.ReactNode }) {
   return (
