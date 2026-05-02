@@ -234,14 +234,18 @@ async function sendOrderEmail({ customer, items, orderedAt }: OrderEmailInput) {
     replyTo: customer.email,
   })
 
-  await sendResendEmail({
-    apiKey,
-    from,
-    to: [customer.email],
-    subject: 'Vi har mottatt Bablade-bestillingen din',
-    text: customerText,
-    html: customerHtml,
-  })
+  try {
+    await sendResendEmail({
+      apiKey,
+      from,
+      to: [customer.email],
+      subject: 'Vi har mottatt Bablade-bestillingen din',
+      text: customerText,
+      html: customerHtml,
+    })
+  } catch (error) {
+    console.error('Customer order confirmation email failed', error)
+  }
 }
 
 async function sendResendEmail({
